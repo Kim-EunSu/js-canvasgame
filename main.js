@@ -31,6 +31,43 @@ function loadImage() {
   gameoverImage.src = "images/gameover.png";
 }
 
+let keysDown = {};
+function setupKeyboardListener() {
+  document.addEventListener("keydown", function (e) {
+    keysDown[e.keyCode] = true;
+    console.log(keysDown);
+  });
+  document.addEventListener("keyup", function (e) {
+    delete keysDown[e.keyCode];
+    console.log(keysDown);
+  });
+}
+
+function update() {
+  if (39 in keysDown) {
+    rocketX += 5;
+  }
+  if (37 in keysDown) {
+    rocketX -= 5;
+  }
+
+  if (rocketX <= 0) {
+    rocketX = 0;
+  }
+  if (rocketX >= canvas.width - 96) {
+    rocketX = canvas.width - 96;
+  }
+
+  // if (38 in keysDown) {
+  //   rocketY -= 5;
+  // }
+  // if (40 in keysDown) {
+  //   rocketY += 5;
+  // }
+
+  //우주선의 좌표값 canvase안에서만 설정
+}
+
 //이미지를 보여주는 함수
 function render() {
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -38,10 +75,11 @@ function render() {
 }
 
 function main() {
-  render();
-  //여러번 호출해서 계속 보여줌
-  requestAnimationFrame(main);
+  update(); //좌표값을 업데이트하고
+  render(); //그려주고!!!!
+  requestAnimationFrame(main); // 계속 보여줌
 }
 
 loadImage();
+setupKeyboardListener();
 main();
