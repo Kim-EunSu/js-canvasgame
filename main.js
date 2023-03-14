@@ -10,6 +10,7 @@ document.body.appendChild(canvas);
 let backgroundImage, bulletImage, enemyIamge, rocketImage, gameoverImage;
 
 let gameOver = false; //true이면 게임오버, flase이면 게임끝나지 않음
+let score = 0;
 
 //우주선 좌표
 let rocketX = canvas.width / 2 - 48;
@@ -24,12 +25,28 @@ function Bullet() {
   this.init = function () {
     this.x = rocketX + 19; //총알이 정가운데 나오게하기 위해서
     this.y = rocketY;
+    this.alive = true; // true면 총알상태, false이면 죽은총알상태
 
     bulletList.push(this);
   };
 
   this.update = function () {
     this.y -= 7;
+  };
+
+  this.checkHit = function () {
+    for (let i = 0; i < enemyList.length; i++) {
+      if (
+        this.y <= enemyList[i].y &&
+        this.x >= enemyList[i].x &&
+        this.x <= enemyList[i].x + 40
+      ) {
+        // 총알이 죽게되고 적군의 우주선이 없어짐, 점수획득
+        score++;
+        this.alive = false; //죽은 총알
+        enemyList.splice(i, 1); // 총알맞음 우주선 사라짐
+      }
+    }
   };
 }
 
@@ -124,13 +141,16 @@ function upDate() {
     rocketX = 0;
   }
 
-  if (rocketX >= canvas.width - 96) {
-    rocketX = canvas.width - 96;
+  if (rocketX >= canvas.width - 48) {
+    rocketX = canvas.width - 48;
   }
 
   //총알의 y좌표 업데이트함수 호출
   for (let i = 0; i < bulletList.length; i++) {
-    bulletList[i].update();
+    if (bulletList[i].alive) {
+      bulletList[i].update();
+      bulletList[i].checkHit();
+    }
   }
 
   for (let i = 0; i < enemyList.length; i++) {
@@ -142,9 +162,14 @@ function upDate() {
 function render() {
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
   ctx.drawImage(rocketImage, rocketX, rocketY);
+  ctx.fillText(`Score:${score}`, 15, 30);
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
 
   for (let i = 0; i < bulletList.length; i++) {
-    ctx.drawImage(bulletImage, bulletList[i].x, bulletList[i].y);
+    if (bulletList[i].alive) {
+      ctx.drawImage(bulletImage, bulletList[i].x, bulletList[i].y);
+    }
   }
 
   for (let i = 0; i < enemyList.length; i++) {
